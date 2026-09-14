@@ -43,9 +43,7 @@ async def check_http(target: str, timeout: float) -> CheckResult:
     is the point: a reused keep-alive connection would skip the TCP and TLS
     handshake, which is part of what is being monitored.
     """
-
     started = time.perf_counter()
-
     try:
         # The limit covers the whole request. httpx's own timeout applies to
         # each phase separately and a read timeout only bounds the gap between
@@ -54,20 +52,16 @@ async def check_http(target: str, timeout: float) -> CheckResult:
         async with asyncio.timeout(timeout):
             async with httpx.AsyncClient(timeout=None, follow_redirects=True) as client:
                 response = await client.get(target)
-
     except TimeoutError:
         return CheckResult(False, error=f"No response within {timeout:g}s")
-
     except (httpx.HTTPError, httpx.InvalidURL) as exc:
         # httpx messages are sometimes empty, so the class name carries the
         # meaning: ConnectError, ConnectTimeout, TooManyRedirects and so on.
+        # InvalidURL is not an HTTPError subclass, so it is named separately.
         return CheckResult(False, error=f"{type(exc).__name__}: {exc}".strip(": "))
-
     latency_ms = (time.perf_counter() - started) * 1000
-
     if response.status_code >= 400:
         return CheckResult(False, latency_ms, f"HTTP {response.status_code}")
-
     return CheckResult(True, latency_ms)
 
 
@@ -86,7 +80,8 @@ async def check_tcp(target: str, timeout: float) -> CheckResult:
     except TimeoutError:
         return CheckResult(False, error=f"No connection within {timeout:g}s")
     except (OSError, UnicodeError) as exc:
-        # Refused, unreachable, unknown host: all arrive as OSError subclasses, invalid host — UnicodeError.
+        # Refused, unreachable, unknown host: all arrive as OSError subclasses.
+        # A malformed host name fails IDNA encoding with UnicodeError instead.
         return CheckResult(False, error=str(exc))
     latency_ms = (time.perf_counter() - started) * 1000
     writer.close()
