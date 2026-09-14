@@ -233,9 +233,7 @@ def update_monitor(
     try:
         form = MonitorForm(**fields)
     except ValidationError as exc:
-        return _form_page(
-            request, fields | {"id": monitor_id}, action, _message(exc), 400
-        )
+        return _form_page(request, fields, action, _message(exc), 400)
 
     try:
         with db.connect() as conn:
@@ -251,7 +249,7 @@ def update_monitor(
     except sqlite3.IntegrityError:
         return _form_page(
             request,
-            fields | {"id": monitor_id},
+            fields,
             action,
             f"A monitor named {form.name} already exists.",
             400,

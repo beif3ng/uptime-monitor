@@ -3,10 +3,10 @@
 {# One template for both create and edit: same fields, same rules, different
    action URL. #}
 {% extends "base.html" %}
-{% block title %}{{ "Edit monitor" if fields.id else "New monitor" }}{% endblock %}
+{% block title %}{{ "New monitor" if action == "/monitors/new" else "Edit monitor" }}{% endblock %}
 
 {% block content %}
-<h1>{{ "Edit monitor" if fields.id else "New monitor" }}</h1>
+<h1>{{ self.title() }}</h1>
 
 {% if error %}<p class="error">{{ error }}</p>{% endif %}
 
