@@ -1,0 +1,23 @@
+# AI assistance: parts of this file were written with Claude (Anthropic).
+# Architecture, review and debugging are my own. See README.md, "AI use".
+
+services:
+  monitor:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      MONITOR_DB: /data/monitor.db
+      # Empty is a valid value: without a token the alerts go to the log
+      # instead of Telegram, and everything else still works.
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+    volumes:
+      # Named volume, not a bind mount: SQLite in WAL mode needs proper file
+      # locking, which a bind mount from a Windows or macOS host does not
+      # reliably provide.
+      - monitor-data:/data
+    restart: unless-stopped
+
+volumes:
+  monitor-data:

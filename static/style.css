@@ -1,0 +1,220 @@
+/* AI assistance: parts of this file were written with Claude (Anthropic).
+   Architecture, review and debugging are my own. See README.md, "AI use". */
+
+:root {
+  --bg: #f6f7f9;
+  --panel: #ffffff;
+  --ink: #1c2024;
+  --muted: #6b7280;
+  --line: #e3e6ea;
+  --accent: #2563eb;
+  --up: #16794a;
+  --down: #b42318;
+  --pending: #8a6100;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+header {
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  padding: 14px 24px;
+}
+
+.brand {
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 17px;
+  text-decoration: none;
+}
+
+main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 28px 24px 64px;
+}
+
+h1 { font-size: 22px; margin: 0; }
+
+.page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+th, td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+
+th {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+
+.num { text-align: right; }
+.target { color: var(--muted); font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; }
+.type { text-transform: uppercase; font-size: 12px; color: var(--muted); }
+
+.state {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.state-up      { background: #e6f4ec; color: var(--up); }
+.state-down    { background: #fdeceb; color: var(--down); }
+.state-pending { background: #fbf3e0; color: var(--pending); }
+
+.last { font-size: 13px; max-width: 220px; }
+.last .ok { color: var(--up); }
+.last .fail { color: var(--down); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.last .waiting { color: var(--muted); }
+.last small { display: inline; margin-left: 6px; color: var(--muted); font-size: 12px; }
+
+.actions { text-align: right; white-space: nowrap; }
+.actions form { display: inline; }
+.actions form + a { margin-left: 12px; }
+.actions a { color: var(--accent); text-decoration: none; margin-right: 12px; }
+
+.button {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+.button.secondary { background: var(--panel); color: var(--ink); border-color: var(--line); }
+
+button.link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  color: var(--accent);
+}
+button.link.danger { color: var(--down); }
+
+.stack {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 18px;
+  max-width: 520px;
+}
+
+label { display: block; margin-bottom: 16px; font-weight: 600; }
+
+input, select {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font: inherit;
+  background: #fff;
+}
+
+small { display: block; margin-top: 5px; color: var(--muted); font-weight: 400; }
+
+.row { display: flex; gap: 10px; }
+
+.error {
+  background: #fdeceb;
+  border: 1px solid #f5c2c0;
+  color: var(--down);
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-top: 18px;
+  max-width: 520px;
+}
+
+.empty, .hint { color: var(--muted); }
+.hint { font-size: 13px; margin-top: 14px; }
+code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; }
+
+/* --- Dashboard ------------------------------------------------------- */
+
+header { display: flex; align-items: baseline; gap: 24px; }
+nav a {
+  color: var(--muted);
+  text-decoration: none;
+  margin-right: 16px;
+  font-size: 14px;
+}
+nav a:hover { color: var(--accent); }
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.card-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.uptime { font-size: 26px; font-weight: 600; margin: 8px 0 2px; }
+.card-foot { color: var(--muted); font-size: 12px; display: flex; gap: 8px; }
+.card-last { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.forced {
+  color: var(--down);
+  border: 1px solid #f5c2c0;
+  border-radius: 999px;
+  padding: 0 6px;
+  white-space: nowrap;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px 18px;
+  margin-top: 18px;
+  color: var(--muted);
+}
+.panel h2 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--muted);
+  margin: 0 0 12px;
+}
+.panel table { border: none; border-radius: 0; color: var(--ink); }
+.panel th, .panel td { padding: 7px 10px; font-size: 13px; }
+.panel .ongoing td { color: var(--down); }

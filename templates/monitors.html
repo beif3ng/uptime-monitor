@@ -1,0 +1,78 @@
+{# AI assistance: parts of this file were written with Claude (Anthropic). #}
+{# Architecture, review and debugging are my own. See README.md, "AI use". #}
+{% extends "base.html" %}
+{% block title %}Monitors{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h1>Monitors</h1>
+  <a class="button" href="/monitors/new">New monitor</a>
+</div>
+
+{% if monitors %}
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Target</th>
+      <th class="num">Interval</th>
+      <th class="num">Timeout</th>
+      <th class="num">Confirm</th>
+      <th>Last check</th>
+      <th>State</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for m in monitors %}
+    <tr>
+      <td>{{ m.name }}</td>
+      <td><span class="type">{{ m.type }}</span></td>
+      <td class="target">{{ m.target }}</td>
+      <td class="num">{{ m.interval_seconds }}s</td>
+      <td class="num">{{ m.timeout_seconds }}s</td>
+      <td class="num">{{ m.confirmation_threshold }}</td>
+      <td class="last">
+        {% if m.last_checked_at %}
+          {% if m.last_ok %}
+            <span class="ok">{{ "%.0f"|format(m.last_latency_ms) }} ms</span>
+          {% else %}
+            {# The error can be a long line of network detail, so the cell is
+               clipped in CSS and the full text lives in the tooltip. #}
+            <span class="fail" title="{{ m.last_error }}">{{ m.last_error }}</span>
+          {% endif %}
+          {# checked_at is a UTC ISO timestamp; this slice is its clock time. #}
+          <small>{{ m.last_checked_at[11:19] }} UTC</small>
+        {% else %}
+          <span class="waiting">not checked yet</span>
+        {% endif %}
+      </td>
+      <td><span class="state state-{{ m.state }}">{{ m.state }}</span></td>
+      <td class="actions">
+        <form method="post" action="/monitors/{{ m.id }}/toggle-forced-down">
+          <button class="link" type="submit">
+            {{ "Release" if m.forced_down else "Force down" }}
+          </button>
+        </form>
+        <a href="/monitors/{{ m.id }}/edit">Edit</a>
+        {# HTML forms only speak GET and POST, so delete is a POST to its own
+           path rather than a DELETE request. #}
+        <form method="post" action="/monitors/{{ m.id }}/delete">
+          <button class="link danger" type="submit">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<p class="hint">
+  Checks run in the background; reload the page to see newer results.
+  A monitor stays <code>pending</code> until one state is confirmed by as many
+  checks in a row as its <code>Confirm</code> column asks for.
+  <code>Force down</code> makes a monitor fail without touching its target.
+</p>
+{% else %}
+<p class="empty">No monitors yet. Add the first one to get started.</p>
+{% endif %}
+{% endblock %}

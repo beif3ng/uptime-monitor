@@ -1,0 +1,57 @@
+{# AI assistance: parts of this file were written with Claude (Anthropic). #}
+{# Architecture, review and debugging are my own. See README.md, "AI use". #}
+{# One template for both create and edit: same fields, same rules, different
+   action URL. #}
+{% extends "base.html" %}
+{% block title %}{{ "Edit monitor" if fields.id else "New monitor" }}{% endblock %}
+
+{% block content %}
+<h1>{{ "Edit monitor" if fields.id else "New monitor" }}</h1>
+
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+<form method="post" action="{{ action }}" class="stack">
+  <label>
+    Name
+    <input name="name" value="{{ fields.name }}" required autofocus>
+  </label>
+
+  <label>
+    Type
+    <select name="type">
+      <option value="http" {{ "selected" if fields.type == "http" }}>HTTP</option>
+      <option value="tcp" {{ "selected" if fields.type == "tcp" }}>TCP</option>
+    </select>
+  </label>
+
+  <label>
+    Target
+    <input name="target" value="{{ fields.target }}" required
+           placeholder="https://example.com/health or db.example.com:5432">
+    <small>A full URL for HTTP, host:port for TCP.</small>
+  </label>
+
+  <label>
+    Interval, seconds
+    <input name="interval_seconds" value="{{ fields.interval_seconds }}" required>
+  </label>
+
+  <label>
+    Timeout, seconds
+    <input name="timeout_seconds" value="{{ fields.timeout_seconds }}" required>
+    <small>Must be shorter than the interval.</small>
+  </label>
+
+  <label>
+    Confirmation threshold
+    <input name="confirmation_threshold"
+           value="{{ fields.confirmation_threshold }}" required>
+    <small>How many identical results in a row confirm a state change.</small>
+  </label>
+
+  <div class="row">
+    <button class="button" type="submit">Save</button>
+    <a class="button secondary" href="/monitors">Cancel</a>
+  </div>
+</form>
+{% endblock %}
