@@ -135,11 +135,14 @@ def _message(exc: ValidationError) -> str:
     return f"{str(error['loc'][0]).replace('_', ' ').capitalize()}: {text}"
 
 
-def _form_page(request, fields, action, error=None, status=200):
+def _form_page(request, fields, monitor_id=None, error=None, status=200):
+    """Render the shared create/edit form; a monitor_id means edit mode."""
+    editing = monitor_id is not None
+    action = f"/monitors/{monitor_id}/edit" if editing else "/monitors/new"
     return templates.TemplateResponse(
         request,
         "monitor_form.html",
-        {"fields": fields, "action": action, "error": error},
+        {"fields": fields, "action": action, "editing": editing, "error": error},
         status_code=status,
     )
 
@@ -181,7 +184,7 @@ def list_monitors(request: Request):
 
 @app.get("/monitors/new")
 def new_monitor(request: Request):
-    return _form_page(request, DEFAULTS, "/monitors/new")
+    return _form_page(request, DEFAULTS)
 
 
 @app.post("/monitors/new")
@@ -189,7 +192,7 @@ def create_monitor(request: Request, fields: Annotated[dict, Depends(monitor_fie
     try:
         form = MonitorForm(**fields)
     except ValidationError as exc:
-        return _form_page(request, fields, "/monitors/new", _message(exc), 400)
+        return _form_page(request, fields, error=_message(exc), status=400)
 
     try:
         with db.connect() as conn:
@@ -205,9 +208,8 @@ def create_monitor(request: Request, fields: Annotated[dict, Depends(monitor_fie
         return _form_page(
             request,
             fields,
-            "/monitors/new",
-            f"A monitor named {form.name} already exists.",
-            400,
+            error=f"A monitor named {form.name} already exists.",
+            status=400,
         )
     return RedirectResponse("/monitors", status_code=303)
 
@@ -220,7 +222,7 @@ def edit_monitor(request: Request, monitor_id: int):
         ).fetchone()
     if row is None:
         raise HTTPException(404, "No such monitor")
-    return _form_page(request, dict(row), f"/monitors/{monitor_id}/edit")
+    return _form_page(request, dict(row), monitor_id)
 
 
 @app.post("/monitors/{monitor_id}/edit")
@@ -229,11 +231,10 @@ def update_monitor(
     monitor_id: int,
     fields: Annotated[dict, Depends(monitor_fields)],
 ):
-    action = f"/monitors/{monitor_id}/edit"
     try:
         form = MonitorForm(**fields)
     except ValidationError as exc:
-        return _form_page(request, fields, action, _message(exc), 400)
+        return _form_page(request, fields, monitor_id, _message(exc), 400)
 
     try:
         with db.connect() as conn:
@@ -250,7 +251,7 @@ def update_monitor(
         return _form_page(
             request,
             fields,
-            action,
+            monitor_id,
             f"A monitor named {form.name} already exists.",
             400,
         )
