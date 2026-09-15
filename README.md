@@ -230,9 +230,16 @@ draft implementation code from those decisions, to write docstrings and
 comments, and to help with debugging. Every file it touched was read and
 accepted by me before it went in.
 
-<!-- TODO: add a sentence or two of your own here, naming a place where you
-     changed or rejected what the assistant produced. Only you can write that
-     honestly, and it is the part of this section a reader will trust most. -->
+Some places where I changed or turned down what was on the table. I rejected
+Celery and Redis: for a minimal monitor they are overkill. I fixed the Edit
+page losing its title when validation failed, then simplified that logic after
+an AI code review. I fixed the latency chart, which kept growing taller as the
+window was resized. I dropped a heartbeat strip and kept the latency chart and
+the incident feed instead. From 14 September I also changed how I work with the
+assistant: I make targeted changes myself and use it to point to the right
+place and explain why. An AI assistant can give a different answer to the
+same request every time; writing a small edit myself means I decide exactly
+what it does and can keep track of it.
 
 `static/chart.umd.min.js` is third-party code, not written for this project:
 Chart.js 4.5.1, MIT licensed. Its origin and licence are recorded in
