@@ -28,7 +28,6 @@ import db
 BASE_DIR = Path(__file__).parent
 
 
-# Default values for form
 DEFAULTS = {
     "name": "",
     "type": "http",
