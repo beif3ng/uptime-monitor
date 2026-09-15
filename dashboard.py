@@ -14,7 +14,7 @@ from datetime import datetime, timedelta, timezone
 import db
 
 # How much history the latency chart and the uptime figure cover.
-CHART_MINUTES = 30
+CHART_MINUTES = 10
 UPTIME_HOURS = 24
 # Guard against a fast monitor filling the chart with more points than the
 # canvas has pixels.
@@ -113,13 +113,16 @@ def payload():
         )
         # x is minutes ago, so the chart needs no date adapter and no shared
         # set of labels between monitors that tick at different rates.
+        # A failed check is sent as y=null: Chart.js leaves spanGaps off by default,
+        # so the line breaks there.
+        # https://www.chartjs.org/docs/latest/charts/line.html
         points = [
             {
                 "x": round((_parse(c["checked_at"]) - now).total_seconds() / 60, 3),
-                "y": round(c["latency_ms"], 1),
+                "y": round(c["latency_ms"], 1) if c["ok"] else None,
             }
             for c in recent
-            if c["monitor_id"] == monitor["id"] and c["latency_ms"] is not None
+            if c["monitor_id"] == monitor["id"]
         ]
         series.append({"name": monitor["name"], "points": points[-MAX_POINTS:]})
 
