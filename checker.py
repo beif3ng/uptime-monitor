@@ -96,7 +96,7 @@ async def run_check(monitor) -> CheckResult:
     taking a real service offline.
     """
     if monitor["forced_down"]:
-        return CheckResult(False, error="Forced down from the dashboard")
+        return CheckResult(False, error="Forced down")
     probe = check_http if monitor["type"] == "http" else check_tcp
     return await probe(monitor["target"], monitor["timeout_seconds"])
 
