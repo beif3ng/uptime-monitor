@@ -94,7 +94,7 @@ tbody tr:last-child td { border-bottom: none; }
 .last .ok { color: var(--up); }
 .last .fail { color: var(--down); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .last .waiting { color: var(--muted); }
-.last small { display: inline; margin-left: 6px; color: var(--muted); font-size: 12px; }
+.last small { margin-top: 0; white-space: nowrap; color: var(--muted); font-size: 12px; }
 
 .actions { text-align: right; white-space: nowrap; }
 .actions form { display: inline; }
