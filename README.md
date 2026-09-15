@@ -83,7 +83,7 @@ pytest
 | `templates/monitors.html` | The management table: every monitor, its last check, and the demo kill switch. |
 | `templates/monitor_form.html` | Create and edit, one form for both. |
 | `templates/dashboard.html` | The dashboard shell. The three panels are filled by JavaScript. |
-| `static/dashboard.js` | Fetches the JSON every five seconds and redraws the cards, the chart and the feed. |
+| `static/dashboard.js` | Fetches the JSON every three seconds and redraws the cards, the chart and the feed. |
 | `static/style.css` | All the styling. No framework. |
 | `static/chart.umd.min.js` | **Not my code.** Chart.js 4.5.1, MIT. See `static/VENDOR.md`. |
 | `Dockerfile`, `docker-compose.yml` | One image, one service, one volume for the database. |
@@ -168,12 +168,17 @@ existed.
 ### Frontend without a build step
 
 Jinja2 renders the pages; the dashboard then polls one JSON endpoint every
-five seconds and redraws itself. No SPA, no bundler, no WebSocket. A
+three seconds and redraws itself. No SPA, no bundler, no WebSocket. A
 WebSocket would be the right answer for hundreds of clients; for a dashboard
 one person keeps open it is a connection to manage in exchange for nothing.
 
 The three panels come from one endpoint rather than three, so they always
 describe the same moment.
+
+A failed check breaks the latency line: it is sent as `null` based on `ok`, so
+an HTTP 5xx breaks it too. A card's border turns red on the confirmed state,
+not on the last check. The gap between where the line breaks and when the
+border turns red is the confirmation threshold, made visible.
 
 Chart.js is committed to `static/` instead of being loaded from a CDN, because
 the container should work with no internet access.
