@@ -2,28 +2,25 @@
 {# Architecture, review and debugging are my own. See README.md, "AI use". #}
 {% extends "base.html" %}
 {% block title %}Dashboard{% endblock %}
-
 {% block content %}
-{# The page ships empty and is filled by dashboard.js from /api/dashboard.
+  {# The page ships empty and is filled by dashboard.js from /api/dashboard.
    Rendering the same three panels in Jinja as well would mean writing every
    one of them twice and keeping the two copies in step. #}
-<div class="page-head">
-  <h1>Dashboard</h1>
-  <span class="hint" id="updated">loading…</span>
-</div>
-
-<div class="cards" id="cards"></div>
-
-<section class="panel">
-  <h2>Latency, last {{ window_minutes }} minutes</h2>
-  <canvas id="latency" height="220"></canvas>
-</section>
-
-<section class="panel">
-  <h2>Incidents</h2>
-  <div id="incidents"></div>
-</section>
-
-<script src="/static/chart.umd.min.js"></script>
-<script src="/static/dashboard.js"></script>
+  <div class="page-head">
+    <h1>Dashboard</h1>
+    <span class="hint" id="updated">loading…</span>
+  </div>
+  <div class="cards" id="cards"></div>
+  <section class="panel">
+    <h2>Latency, last {{ window_minutes }} minutes</h2>
+    <div class="chart-box">
+      <canvas id="latency"></canvas>
+    </div>
+  </section>
+  <section class="panel">
+    <h2>Incidents</h2>
+    <div id="incidents"></div>
+  </section>
+  <script src="/static/chart.umd.min.js"></script>
+  <script src="/static/dashboard.js"></script>
 {% endblock %}

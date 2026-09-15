@@ -218,3 +218,10 @@ nav a:hover { color: var(--accent); }
 .panel table { border: none; border-radius: 0; color: var(--ink); }
 .panel th, .panel td { padding: 7px 10px; font-size: 13px; }
 .panel .ongoing td { color: var(--down); }
+
+/* Size of canvas is determined by Chart.js using positioned container
+https://www.chartjs.org/docs/latest/configuration/responsive.html */
+.chart-box {
+  position: relative;
+  height: 220px;
+}
