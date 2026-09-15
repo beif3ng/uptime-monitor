@@ -34,6 +34,7 @@ function card(monitor) {
   const forced = monitor.forced_down ? '<span class="forced">forced</span>' : "";
   const element = document.createElement("div");
   element.className = "card";
+  element.classList.toggle("down", monitor.state === "down");
   element.innerHTML = `
     <div class="card-head">
       <span class="card-name"></span>

@@ -187,6 +187,7 @@ nav a:hover { color: var(--accent); }
   border-radius: 8px;
   padding: 14px 16px;
 }
+.card.down { border-color: var(--down); box-shadow: 0 0 0 1px var(--down); }
 .card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .card-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .uptime { font-size: 26px; font-weight: 600; margin: 8px 0 2px; }
