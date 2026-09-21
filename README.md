@@ -1,6 +1,6 @@
 # Uptime Monitor
 
-#### Video Demo: <TODO: paste the YouTube URL here>
+#### Video Demo: https://youtu.be/BcT3nr9sVXk
 
 #### Description
 
